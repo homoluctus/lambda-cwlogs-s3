@@ -1,0 +1,68 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Parameters:
+  CWLogsExportBucketName:
+    Description: "S3 buket name for CW Logs backup"
+    Type: String
+  CWLogsExportBucketLifecycleStatus:
+    Description: "Apply lifecycle or not"
+    Type: String
+    AllowedValues: ["Disabled", "Enabled"]
+
+Resources:
+  CWLogsExportBucket:
+    Type: "AWS::S3::Bucket"
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketName:
+        Ref: CWLogsExportBucketName
+      AccessControl: BucketOwnerFullControl
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      LifecycleConfiguration:
+        Rules:
+          - ExpirationInDays: 365
+            Id: CWLogsExportBucketLifecycleRule
+            Status:
+              Ref: CWLogsExportBucketLifecycleStatus
+            Prefix: logs/
+            Transitions:
+              - StorageClass: STANDARD_IA
+                TransitionInDays: 30
+      Tags:
+        - Key: "isTest"
+          Value: "True"
+
+  CWLogsExportBucketPolicy:
+    Type: "AWS::S3::BucketPolicy"
+    Properties:
+      Bucket:
+        Ref: CWLogsExportBucket
+      PolicyDocument:
+        Statement:
+          - Action:
+              - "s3:GetBucketAcl"
+            Effect: "Allow"
+            Resource:
+              Fn::Sub: "arn:aws:s3:::${CWLogsExportBucketName}"
+            Principal:
+              Service:
+                - Fn::Sub: "logs.${AWS::Region}.amazonaws.com"
+          - Action:
+              - "s3:PutObject"
+            Effect: "Allow"
+            Resource:
+              Fn::Sub: "arn:aws:s3:::${CWLogsExportBucketName}/*"
+            Condition:
+              StringEquals:
+                s3:x-amz-acl: "bucket-owner-full-control"
+            Principal:
+              Service:
+                - Fn::Sub: "logs.${AWS::Region}.amazonaws.com"
