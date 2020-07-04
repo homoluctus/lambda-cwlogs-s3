@@ -1,0 +1,23 @@
+name: CloudFormation Linter
+
+on:
+  pull_request:
+    paths:
+      - 'cfn/*.yml'
+
+jobs:
+  lint:
+    name: Lint Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+
+      - name: Install cfn-python-lint
+        run: pip install --no-cache-dir cfn-lint
+
+      - name: Execute lint check
+        run: cfn-lint cfn/*.yml

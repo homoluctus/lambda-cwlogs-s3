@@ -1,0 +1,38 @@
+name: Dry Run sls deploy
+
+on:
+  pull_request:
+    paths:
+      - 'serverless.yml'
+      - 'config/*.yml'
+
+jobs:
+  deploy:
+    name: Serverless Validation
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - uses: actions/setup-node@v1
+      with:
+        node-version: '12.x'
+
+    - name: Install Serverless
+      run: |
+        npm install -g serverless
+        npm install serverless-python-requirements
+
+    - uses: actions/setup-python@v2
+      with:
+        python-version: '3.8'
+
+    - name: Install Pipenv
+      run: |
+        pip install pipenv
+        pipenv sync
+
+    - name: Dry Run
+      run: sls deploy -v --noDeploy
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}

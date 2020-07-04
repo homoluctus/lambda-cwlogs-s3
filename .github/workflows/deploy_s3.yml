@@ -1,0 +1,27 @@
+name: Deploy S3
+
+on:
+  push:
+    tags:
+      # ${Ymd}.s3.${sequence}
+      - '[0-9]+.s3.[0-9]+'
+
+jobs:
+  deploy:
+    name: Deploy S3
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Install awscli
+        run: pip install --no-cache-dir awscli
+
+      - name: Execute CFn
+        run: bash cfn/deploy.bash s3
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}

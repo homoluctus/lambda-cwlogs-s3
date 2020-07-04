@@ -1,0 +1,60 @@
+name: Test
+
+on: pull_request
+
+jobs:
+  lint:
+    name: Lint check
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+
+      - name: Install dependencies
+        run: |
+          pip install pipenv
+          pipenv sync -d
+
+      - name: Execute lint check
+        run: pipenv run lint
+
+  audit:
+    name: Pipenv check
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+
+      - name: Install dependencies
+        run: |
+          pip install pipenv
+          pipenv sync -d
+
+      - name: Pipenv Audit
+        run: pipenv check -v
+        env:
+          PIPENV_PYUP_API_KEY: ""
+
+  mypy:
+    name: mypy check
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+
+      - name: Install dependencies
+        run: |
+          pip install pipenv
+          pipenv sync -d
+
+      - name: Execute mypy
+        run: pipenv run check
