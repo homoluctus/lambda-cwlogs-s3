@@ -11,6 +11,9 @@ CloudWatch Logsに保存しているログをS3へ定期的にエクスポート
   - [1. 依存パッケージインストール](#1-依存パッケージインストール)
   - [2. ローカルテスト用の.envを作成](#2-ローカルテスト用のenvを作成)
 - [エクスポートするロググループの追加方法](#エクスポートするロググループの追加方法)
+- [デプロイ方法](#デプロイ方法)
+  - [S3](#s3)
+  - [Lambda (Serverless Framework)](#lambda-serverless-framework)
 
 <!-- /TOC -->
 
@@ -42,9 +45,19 @@ cp .env.sample .env
 
 ## エクスポートするロググループの追加方法
 
-[backup_targets.py](./src/cwlogs.py)に以下のように記述する
+[cwlogs.py](./src/cwlogs.py)に以下のように記述する
 
 ```python
 class NewLogGroup(LogGroup):
   log_group = 'hello-world'
 ```
+
+## デプロイ方法
+
+### S3
+
+%Y%m%d.s3.${sequence}の記法でタグをプッシュ
+
+### Lambda (Serverless Framework)
+
+%Y%m%d.${sequence}の記法でタグをプッシュ
